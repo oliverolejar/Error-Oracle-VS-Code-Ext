@@ -3,6 +3,8 @@
   "displayName": "Error Oracle",
   "description": "Explains errors at your cursor",
   "version": "0.0.1",
+  "publisher": "Oliver Olejar",
+  "license": "Apache-2.0",
   "engines": {
     "vscode": "^1.106.1"
   },
@@ -14,8 +16,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "error-oracle.helloWorld",
-        "title": "Hello World"
+        "command": "error-oracle.explainError",
+        "title": "Error Oracle: Explain error at cursor"
       }
     ]
   },
