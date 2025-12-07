@@ -86,6 +86,15 @@ function explainError(message: string, languageId: string): string {
     ].join('\n');
 }
 
+// get error at position automatically
+function getDiagnosticAtPosition(
+    document: vscode.TextDocument,
+    position: vscode.Position
+): vscode.Diagnostic | undefined {
+    const diagnostics = vscode.languages.getDiagnostics(document.uri);
+    return diagnostics.find(d => d.range.contains(position));
+}
+
 /**
  * Called when extension is activated.
  */
@@ -104,11 +113,7 @@ export function activate(context: vscode.ExtensionContext) {
             const document = editor.document;
             const cursorPos = editor.selection.active;
 
-            // Get all diagnostics (errors/warnings) for this document
-            const diagnostics = vscode.languages.getDiagnostics(document.uri);
-
-            // Find the first diagnostic whose range contains the cursor position
-            const diagAtCursor = diagnostics.find(d => d.range.contains(cursorPos));
+            const diagAtCursor = getDiagnosticAtPosition(document, cursorPos);
 
             if (!diagAtCursor) {
                 vscode.window.showInformationMessage(
@@ -139,6 +144,38 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(disposable);
+
+    const hoverProvider = vscode.languages.registerHoverProvider(
+        ['python', 'typescript', 'javascript'],
+        {
+            provideHover(document, position, token) {
+                const diag = getDiagnosticAtPosition(document, position);
+                if (!diag) {
+                    return;
+                }
+
+                // Only for real errors, not hints/warnings
+                if (diag.severity !== vscode.DiagnosticSeverity.Error) {
+                    return;
+                }
+
+                const languageId = document.languageId;
+                const explanation = explainError(diag.message, languageId);
+
+                // Convert plain text explanation to markdown
+                const md = new vscode.MarkdownString();
+                md.appendMarkdown('**Error Oracle**\n\n');
+                md.appendMarkdown(
+                    explanation.replace(/\n/g, '  \n') // newlines → markdown line breaks
+                );
+                md.isTrusted = true; // allow links in the future if added
+
+                return new vscode.Hover(md);
+            }
+        }
+    );
+
+    context.subscriptions.push(hoverProvider);
 }
 
 /**
