@@ -122,7 +122,19 @@ export function activate(context: vscode.ExtensionContext) {
 
             const explanation = explainError(errorMessage, languageId);
 
-            vscode.window.showInformationMessage(explanation, { modal: true });
+            vscode.window
+				.showInformationMessage(
+					explanation,
+					{ modal: true },
+					'Search web for this error'
+				)
+				.then(selection => {
+					if (selection === 'Search web for this error') {
+						const query = encodeURIComponent(`${languageId} ${errorMessage}`);
+						const url = vscode.Uri.parse(`https://www.google.com/search?q=${query}`);
+						vscode.env.openExternal(url);
+					}
+				});
         }
     );
 
