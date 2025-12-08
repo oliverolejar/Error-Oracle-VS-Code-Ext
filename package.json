@@ -12,19 +12,10 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:python",
-    "onLanguage:typescript",
-    "onLanguage:javascript"
+    "onLanguage:python"
   ],
   "main": "./out/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "error-oracle.explainError",
-        "title": "Error Oracle: Explain error at cursor"
-      }
-    ]
-  },
+  "contributes": {},
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
